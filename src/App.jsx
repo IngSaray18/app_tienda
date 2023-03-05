@@ -8,7 +8,6 @@ import Inicio from "./components/Inicio";
 import Tienda from "./components/Tienda";
 
 const App = () => {
-
   const productos = [
     { id: 1, nombre: "Producto 1" },
     { id: 2, nombre: "Producto 2" },
@@ -17,14 +16,47 @@ const App = () => {
   ];
   const [carrito, setcarrito] = useState([]);
 
-  const addProductToCar = (idProductoNuevo, NombreProducto) =>{
-    if ( carrito.length === 0 ){
-      setcarrito([ { id:idProductoNuevo , nombre: NombreProducto, cantidad: 1  } ])
-    }
+  const addProductToCar = (idProductoNuevo, NombreProducto) => {
+    if (carrito.length === 0) {
+      setcarrito([
+        { id: idProductoNuevo, nombre: NombreProducto, cantidad: 1 },
+      ]);
+    } else {
+      // de otra forma tenemos que revisar que el carrito no tenga ya el producto agregado
+      // si ya los tiene entonces queremos actualizar la cantidad
+      // si no tiene el producto agregado entonces lo agregamos
 
-    
+      const nuevoCarrito = [...carrito]; // clonamos el arreglo para poder editarlo
+
+      //comprobamos si el carrito ya tiene el ID del producto a agregar
+      const ProductoExiste =
+        nuevoCarrito.filter((productoCarrito) => {
+          return productoCarrito.id === idProductoNuevo;
+        }).length > 0;
+
+      if (ProductoExiste) {
+        nuevoCarrito.forEach((productoCarrito, index) => {
+          if (productoCarrito.id === idProductoNuevo) {
+            const cantidad = nuevoCarrito[index].cantidad;
+
+            nuevoCarrito[index] = {
+              id: idProductoNuevo,
+              nombre: NombreProducto,
+              cantidad: cantidad + 1,
+            };
+          }
+        });
+      } else {
+        nuevoCarrito.push({
+          id: idProductoNuevo,
+          nombre: NombreProducto,
+          cantidad: 1,
+        });
+      }
+      setcarrito(nuevoCarrito);
 
     }
+  };
 
   return (
     <Contenedor>
@@ -37,13 +69,18 @@ const App = () => {
       <main>
         <Routes>
           <Route path="*" element={<Error404 />} />
-          <Route path="/" element={<Inicio  />} />
+          <Route path="/" element={<Inicio />} />
           <Route path="/blog" element={<Blog />} />
-          <Route path="/tienda" element={<Tienda productos={productos} addProductToCar={ addProductToCar } />} />
+          <Route
+            path="/tienda"
+            element={
+              <Tienda productos={productos} addProductToCar={addProductToCar} />
+            }
+          />
         </Routes>
       </main>
       <aside>
-      <Carrito carrito={carrito} />
+        <Carrito carrito={carrito} />
       </aside>
     </Contenedor>
   );
